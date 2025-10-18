@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Licious Market Opportunity Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f8f8f8;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #E11E26 0%, #B91821 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(225, 30, 38, 0.2);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #E11E26;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #E11E26;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filters {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+
+        .filters h3 {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .filter-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #E11E26;
+        }
+
+        .chart-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .chart-section h2 {
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .chart-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .insight-box {
+            background: #fff8f8;
+            border-left: 4px solid #E11E26;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .insight-box strong {
+            color: #E11E26;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 420px;
+            margin-bottom: 20px;
+        }
+
+        #marketShareChart {
+            cursor: pointer;
+        }
+
+        .chart-container.tall {
+            height: 400px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .stat-value {
+                font-size: 28px;
+            }
+
+            .chart-container {
+                height: 360px;
+            }
+
+            .chart-container.tall {
+                height: 350px;
+            }
+
+            .drill-down-content {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .drill-down-title {
+                font-size: 18px;
+            }
+
+            .filter-group {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            select {
+                font-size: 11px;
+                padding: 5px 6px;
+            }
+
+            .filters {
+                padding: 10px 12px;
+            }
+
+            .chart-section {
+                padding: 20px 15px;
+            }
+        }
+
+        .legend-custom {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-text {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .drill-down-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .drill-down-modal.active {
+            display: flex;
+        }
+
+        .drill-down-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .drill-down-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f0f0f0;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .drill-down-close:hover {
+            background: #e0e0e0;
+        }
+
+        .drill-down-title {
+            color: #E11E26;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-right: 40px;
+        }
+
+        .drill-down-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .drill-down-stat:last-child {
+            border-bottom: none;
+        }
+
+        .drill-down-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .drill-down-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Nutrition and Meat Purchase Behavior of Gym Goers in Bangalore</h1>
+            <p>Survey Analysis • N=46 Respondents • October 2025</p>
+        </div>
+
+        <div class="filters">
+            <h3>Filter Data</h3>
+            <div class="filter-group">
+                <select id="ageFilter">
+                    <option value="all">All Age Groups</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-35">26-35</option>
+                    <option value="36-45">36-45</option>
+                    <option value="46+">46+</option>
+                </select>
+                <select id="genderFilter">
+                    <option value="all">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <select id="goalFilter">
+                    <option value="all">All Fitness Goals</option>
+                    <option value="Yes, actively trying to lose weight">Weight Loss</option>
+                    <option value="Yes, maintaining current weight">Maintaining</option>
+                    <option value="No, but focused on fitness/muscle gain">Muscle Gain</option>
+                </select>
+                <select id="locationFilter">
+                    <option value="all">All Purchase Points</option>
+                    <option value="Licious">Licious</option>
+                    <option value="Local Butcher">Local Butcher</option>
+                    <option value="Quick Commerce">Quick Commerce</option>
+                    <option value="Supermarkets">Supermarkets</option>
+                    <option value="FreshToHome">FreshToHome</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">17.4%</div>
+                <div class="stat-label">Licious Market Share</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">34.8%</div>
+                <div class="stat-label">Local Butcher Share</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">91.3%</div>
+                <div class="stat-label">Buy Weekly+</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">80.4%</div>
+                <div class="stat-label">Non-Price Driven</div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>🏪 From Where Do People Buy Meat?</h2>
+            <p class="chart-subtitle">Click on any segment to see detailed breakdown</p>
+            <div class="insight-box">
+                <strong>Key Insight:</strong> Local butchers capture 2x Licious's market share despite gym members being the ideal target audience for premium protein brands. <strong>Click any segment above to see detailed breakdown.</strong>
+            </div>
+            <div class="chart-container">
+                <canvas id="marketShareChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>⏰ Purchase Frequency Patterns</h2>
+            <p class="chart-subtitle">High-frequency buyers = Predictable revenue opportunity</p>
+            <div class="chart-container">
+                <canvas id="frequencyChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>💰 Price is NOT the Main Barrier</h2>
+            <p class="chart-subtitle">What prevents people from buying more non-veg?</p>
+            <div class="insight-box">
+                <strong>Critical Finding:</strong> Only 19.6% cite price as a barrier. 60.9% say "nothing prevents them" - this is an innovation problem, not a price problem.
+            </div>
+            <div class="chart-container tall">
+                <canvas id="barriersChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>💡 Why People Choose Their Source</h2>
+            <p class="chart-subtitle">Top reasons driving purchase decisions</p>
+            <div class="chart-container tall">
+                <canvas id="reasonsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <h2>🍽️ Ready-to-Eat Market Opportunity</h2>
+            <p class="chart-subtitle">Interest in minimally prepped/ready-to-eat options</p>
+            <div class="insight-box">
+                <strong>Opportunity:</strong> 56.5% show interest (Very + Somewhat interested) in RTE options - a clear product gap to fill.
+            </div>
+            <div class="chart-container">
+                <canvas id="rteChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="drill-down-modal" id="drillDownModal">
+        <div class="drill-down-content">
+            <button class="drill-down-close" onclick="closeDrillDown()">×</button>
+            <h3 class="drill-down-title" id="drillDownTitle"></h3>
+            <div id="drillDownStats"></div>
+        </div>
+    </div>
+
+    <script>
+        // Survey Data
+        const surveyData = {
+            full: [
+                {"age": "26-35", "gender": "Male", "goal": "No, but focused on fitness/muscle gain", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Price/Affordability", "Hygiene standards"], "rte": "Neutral"},
+                {"age": "26-35", "gender": "Female", "goal": "No, but focused on fitness/muscle gain", "location": "Quick Commerce (BigBasket, Blinkit, Zepto, Swiggy Instamart)", "frequency": "Once a week", "barriers": ["Preparation/Cooking time", "Nothing - I buy as much as I need"], "reasons": ["Convenience/Fast delivery", "Variety of products", "Trust/Brand reputation", "Already shop other groceries there"], "rte": "Somewhat interested"},
+                {"age": "26-35", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Price/Affordability"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Supermarkets (More, Reliance Fresh, D-Mart, etc.)", "frequency": "Once a week", "barriers": ["Storage/Refrigeration issues"], "reasons": ["Quality/Freshness", "Price/Affordability"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Preparation/Cooking time"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Very interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Quick Commerce (BigBasket, Blinkit, Zepto, Swiggy Instamart)", "frequency": "Once a week", "barriers": ["Storage/Refrigeration issues"], "reasons": ["Convenience/Fast delivery", "Already shop other groceries there"], "rte": "Very interested"},
+                {"age": "26-35", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "Licious", "frequency": "Once a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Hygiene standards"], "rte": "Neutral"},
+                {"age": "26-35", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Licious", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Hygiene standards"], "rte": "Somewhat interested"},
+                {"age": "46+", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Proximity/Easy access"], "rte": "Neutral"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Proximity/Easy access"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "Licious", "frequency": "Once a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Somewhat interested"},
+                {"age": "26-35", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "FreshToHome", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Hygiene standards"], "rte": "Somewhat interested"},
+                {"age": "26-35", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Neutral"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Licious", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Very interested"},
+                {"age": "26-35", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "FreshToHome", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Variety of products"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Supermarkets (More, Reliance Fresh, D-Mart, etc.)", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Somewhat interested"},
+                {"age": "26-35", "gender": "Female", "goal": "No, but focused on fitness/muscle gain", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Price/Affordability"], "rte": "Neutral"},
+                {"age": "46+", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Once a week", "barriers": ["Price/Cost"], "reasons": ["Price/Affordability", "Proximity/Easy access"], "rte": "Neutral"},
+                {"age": "36-45", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Once a week", "barriers": ["Price/Cost", "Storage/Refrigeration issues"], "reasons": ["Proximity/Easy access", "Price/Affordability"], "rte": "Somewhat interested"},
+                {"age": "26-35", "gender": "Female", "goal": "Yes, maintaining current weight", "location": "Supermarkets (More, Reliance Fresh, D-Mart, etc.)", "frequency": "Once a week", "barriers": ["Price/Cost"], "reasons": ["Convenience/Fast delivery", "Already shop other groceries there"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Neutral"},
+                {"age": "26-35", "gender": "Female", "goal": "Yes, maintaining current weight", "location": "FreshToHome", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Hygiene standards"], "rte": "Somewhat interested"},
+                {"age": "46+", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Once a week", "barriers": ["Price/Cost"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Prefer to prepare from scratch"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "Licious", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Very interested"},
+                {"age": "26-35", "gender": "Male", "goal": "No, but focused on fitness/muscle gain", "location": "Quick Commerce (BigBasket, Blinkit, Zepto, Swiggy Instamart)", "frequency": "Once a week", "barriers": ["Preparation/Cooking time"], "reasons": ["Convenience/Fast delivery", "Trust/Brand reputation"], "rte": "Very interested"},
+                {"age": "46+", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Supermarkets (More, Reliance Fresh, D-Mart, etc.)", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Neutral"},
+                {"age": "26-35", "gender": "Male", "goal": "No, but focused on fitness/muscle gain", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Price/Affordability"], "rte": "Not interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "FreshToHome", "frequency": "Once a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Somewhat interested"},
+                {"age": "18-25", "gender": "Male", "goal": "No, but focused on fitness/muscle gain", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Price/Affordability"], "rte": "Not interested"},
+                {"age": "26-35", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Licious", "frequency": "Once a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Hygiene standards"], "rte": "Very interested"},
+                {"age": "36-45", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Quick Commerce (BigBasket, Blinkit, Zepto, Swiggy Instamart)", "frequency": "Multiple times a week", "barriers": ["Preparation/Cooking time"], "reasons": ["Convenience/Fast delivery", "Variety of products"], "rte": "Very interested"},
+                {"age": "46+", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Once a week", "barriers": ["Quality concerns"], "reasons": ["Proximity/Easy access", "Price/Affordability"], "rte": "Neutral"},
+                {"age": "26-35", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Supermarkets (More, Reliance Fresh, D-Mart, etc.)", "frequency": "Once a week", "barriers": ["Price/Cost", "Storage/Refrigeration issues"], "reasons": ["Convenience/Fast delivery", "Variety of products"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Neutral"},
+                {"age": "26-35", "gender": "Male", "goal": "No, but focused on fitness/muscle gain", "location": "FreshToHome", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Very interested"},
+                {"age": "46+", "gender": "Female", "goal": "Yes, maintaining current weight", "location": "Local butcher shop/offline stores", "frequency": "Once a week", "barriers": ["Preparation/Cooking time"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Prefer to prepare from scratch"},
+                {"age": "26-35", "gender": "Female", "goal": "No, but focused on fitness/muscle gain", "location": "Quick Commerce (BigBasket, Blinkit, Zepto, Swiggy Instamart)", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Convenience/Fast delivery", "Already shop other groceries there"], "rte": "Somewhat interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Licious", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Hygiene standards"], "rte": "Very interested"},
+                {"age": "18-25", "gender": "Female", "goal": "No, but focused on fitness/muscle gain", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Price/Cost"], "reasons": ["Quality/Freshness", "Price/Affordability"], "rte": "Not interested"},
+                {"age": "26-35", "gender": "Male", "goal": "Yes, maintaining current weight", "location": "FreshToHome", "frequency": "Once a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Variety of products"], "rte": "Neutral"},
+                {"age": "46+", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Supermarkets (More, Reliance Fresh, D-Mart, etc.)", "frequency": "Once a week", "barriers": ["Price/Cost"], "reasons": ["Trust/Brand reputation", "Already shop other groceries there"], "rte": "Prefer to prepare from scratch"},
+                {"age": "36-45", "gender": "Female", "goal": "Yes, actively trying to lose weight", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Preparation/Cooking time"], "reasons": ["Quality/Freshness", "Proximity/Easy access"], "rte": "Somewhat interested"},
+                {"age": "26-35", "gender": "Male", "goal": "No, but focused on fitness/muscle gain", "location": "Local butcher shop/offline stores", "frequency": "Multiple times a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Trust/Brand reputation"], "rte": "Not interested"},
+                {"age": "36-45", "gender": "Male", "goal": "Yes, actively trying to lose weight", "location": "Licious", "frequency": "Once a week", "barriers": ["Nothing - I buy as much as I need"], "reasons": ["Quality/Freshness", "Convenience/Fast delivery"], "rte": "Somewhat interested"},
+                {"age": "18-25", "gender": "Female", "goal": "No, but focused on fitness/muscle gain", "location": "Quick Commerce (BigBasket, Blinkit, Zepto, Swiggy Instamart)", "frequency": "Once a week", "barriers": ["Price/Cost"], "reasons": ["Convenience/Fast delivery", "Variety of products"], "rte": "Neutral"},
+                {"age": "46+", "gender": "Male", "goal": "No, not currently focused on weight management", "location": "Local butcher shop/offline stores", "frequency": "Once a week", "barriers": ["Quality concerns"], "reasons": ["Proximity/Easy access", "Price/Affordability"], "rte": "Not interested"}
+            ]
+        };
+
+        let filteredData = [...surveyData.full];
+
+        const liciousRed = '#E11E26';
+        const liciousBlack = '#000000';
+        const gray1 = '#666666';
+        const gray2 = '#999999';
+        const gray3 = '#CCCCCC';
+
+        const colorPalette = [liciousRed, '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif';
+        Chart.defaults.color = gray1;
+
+        let charts = {};
+
+        function filterData() {
+            const ageFilter = document.getElementById('ageFilter').value;
+            const genderFilter = document.getElementById('genderFilter').value;
+            const goalFilter = document.getElementById('goalFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+
+            filteredData = surveyData.full.filter(row => {
+                let locationMatch = true;
+                if (locationFilter !== 'all') {
+                    if (locationFilter === 'Local Butcher') {
+                        locationMatch = row.location.includes('Local butcher');
+                    } else if (locationFilter === 'Quick Commerce') {
+                        locationMatch = row.location.includes('Quick Commerce');
+                    } else if (locationFilter === 'Supermarkets') {
+                        locationMatch = row.location.includes('Supermarket');
+                    } else if (locationFilter === 'Others') {
+                        locationMatch = !row.location.includes('Local butcher') && 
+                                      !row.location.includes('Quick Commerce') && 
+                                      row.location !== 'Licious' && 
+                                      !row.location.includes('Supermarket') && 
+                                      row.location !== 'FreshToHome';
+                    } else {
+                        locationMatch = row.location === locationFilter;
+                    }
+                }
+                
+                return (ageFilter === 'all' || row.age === ageFilter) &&
+                       (genderFilter === 'all' || row.gender === genderFilter) &&
+                       (goalFilter === 'all' || row.goal === goalFilter) &&
+                       locationMatch;
+            });
+
+            updateAllCharts();
+        }
+
+        function updateAllCharts() {
+            updateMarketShareChart();
+            updateFrequencyChart();
+            updateBarriersChart();
+            updateReasonsChart();
+            updateRTEChart();
+        }
+
+        function updateMarketShareChart() {
+            const locationCounts = {};
+            filteredData.forEach(row => {
+                const loc = row.location;
+                locationCounts[loc] = (locationCounts[loc] || 0) + 1;
+            });
+
+            // Simplify location names
+            const simplified = {};
+            Object.entries(locationCounts).forEach(([key, value]) => {
+                if (key.includes('Local butcher')) simplified['Local Butcher'] = (simplified['Local Butcher'] || 0) + value;
+                else if (key.includes('Quick Commerce')) simplified['Quick Commerce'] = (simplified['Quick Commerce'] || 0) + value;
+                else if (key === 'Licious') simplified['Licious'] = (simplified['Licious'] || 0) + value;
+                else if (key.includes('Supermarket')) simplified['Supermarkets'] = (simplified['Supermarkets'] || 0) + value;
+                else if (key === 'FreshToHome') simplified['FreshToHome'] = (simplified['FreshToHome'] || 0) + value;
+                else simplified['Others'] = (simplified['Others'] || 0) + value;
+            });
+
+            const sortedData = Object.entries(simplified).sort((a, b) => b[1] - a[1]);
+            const labels = sortedData.map(d => d[0]);
+            const data = sortedData.map(d => d[1]);
+            const total = data.reduce((a, b) => a + b, 0);
+
+            if (charts.marketShare) charts.marketShare.destroy();
+
+            const ctx = document.getElementById('marketShareChart').getContext('2d');
+            
+            // Responsive padding based on screen size
+            const isMobile = window.innerWidth < 768;
+            const paddingConfig = isMobile ? 
+                { top: 15, bottom: 15, left: 40, right: 40 } : 
+                { top: 20, bottom: 20, left: 80, right: 80 };
+            
+            charts.marketShare = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [liciousRed, gray1, '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'],
+                        borderWidth: 3,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const index = elements[0].index;
+                            const label = labels[index];
+                            showDrillDown(label);
+                        }
+                    },
+                    layout: {
+                        padding: paddingConfig
+                    },
+                    cutout: '55%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${value} respondents (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    afterDatasetsDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const chartArea = chart.chartArea;
+                        const centerX = (chartArea.left + chartArea.right) / 2;
+                        const centerY = (chartArea.top + chartArea.bottom) / 2;
+                        const isMobile = window.innerWidth < 768;
+                        
+                        chart.data.datasets.forEach((dataset, datasetIndex) => {
+                            const meta = chart.getDatasetMeta(datasetIndex);
+                            
+                            meta.data.forEach((element, index) => {
+                                const data = dataset.data[index];
+                                const percentage = ((data / total) * 100).toFixed(1);
+                                const label = chart.data.labels[index];
+                                
+                                // Get the position of the slice
+                                const model = element;
+                                const midAngle = (model.startAngle + model.endAngle) / 2;
+                                
+                                // Calculate positions
+                                const innerRadius = model.innerRadius;
+                                const outerRadius = model.outerRadius;
+                                
+                                // INTERNAL PERCENTAGE (inside the donut)
+                                const internalRadius = (innerRadius + outerRadius) / 2;
+                                const internalX = centerX + Math.cos(midAngle) * internalRadius;
+                                const internalY = centerY + Math.sin(midAngle) * internalRadius;
+                                
+                                ctx.fillStyle = '#fff';
+                                ctx.font = isMobile ? 'bold 12px Arial' : 'bold 14px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(`${percentage}%`, internalX, internalY);
+                                
+                                // EXTERNAL LABEL with connector line
+                                // Point on the edge of the slice
+                                const x1 = centerX + Math.cos(midAngle) * outerRadius;
+                                const y1 = centerY + Math.sin(midAngle) * outerRadius;
+                                
+                                // Extended point for the line (responsive)
+                                const lineLength = isMobile ? 15 : 20;
+                                const x2 = centerX + Math.cos(midAngle) * (outerRadius + lineLength);
+                                const y2 = centerY + Math.sin(midAngle) * (outerRadius + lineLength);
+                                
+                                // Label position (with horizontal extension)
+                                const horizontalExtension = 3;
+                                const x3 = x2 + (x2 > centerX ? horizontalExtension : -horizontalExtension);
+                                const y3 = y2;
+                                
+                                // Draw connecting line
+                                ctx.beginPath();
+                                ctx.strokeStyle = '#999';
+                                ctx.lineWidth = 1;
+                                ctx.moveTo(x1, y1);
+                                ctx.lineTo(x2, y2);
+                                ctx.lineTo(x3, y3);
+                                ctx.stroke();
+                                
+                                // Draw label name only (outside)
+                                ctx.fillStyle = '#333';
+                                ctx.font = isMobile ? '10px Arial' : '12px Arial';
+                                ctx.textBaseline = 'middle';
+                                
+                                // Align text based on position
+                                if (x2 > centerX) {
+                                    ctx.textAlign = 'left';
+                                    ctx.fillText(`${label}`, x3 + 3, y3);
+                                } else {
+                                    ctx.textAlign = 'right';
+                                    ctx.fillText(`${label}`, x3 - 3, y3);
+                                }
+                            });
+                        });
+                    }
+                }]
+            });
+        }
+
+        function updateFrequencyChart() {
+            const frequencyCounts = {};
+            filteredData.forEach(row => {
+                frequencyCounts[row.frequency] = (frequencyCounts[row.frequency] || 0) + 1;
+            });
+
+            const order = ['Multiple times a week', 'Once a week', '2-3 times a month', 'Once a month', 'Rarely (less than once a month)'];
+            const labels = order.filter(f => frequencyCounts[f]);
+            const data = labels.map(l => frequencyCounts[l]);
+
+            if (charts.frequency) charts.frequency.destroy();
+
+            const ctx = document.getElementById('frequencyChart').getContext('2d');
+            charts.frequency = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Respondents',
+                        data: data,
+                        backgroundColor: liciousRed,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 5 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBarriersChart() {
+            const barrierCounts = {};
+            filteredData.forEach(row => {
+                row.barriers.forEach(b => {
+                    barrierCounts[b] = (barrierCounts[b] || 0) + 1;
+                });
+            });
+
+            const sortedBarriers = Object.entries(barrierCounts).sort((a, b) => b[1] - a[1]);
+            const labels = sortedBarriers.map(b => b[0]);
+            const data = sortedBarriers.map(b => b[1]);
+
+            const colors = labels.map(l => l.includes('Price') ? '#FF6B6B' : gray2);
+
+            if (charts.barriers) charts.barriers.destroy();
+
+            const ctx = document.getElementById('barriersChart').getContext('2d');
+            charts.barriers = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Mentions',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateReasonsChart() {
+            const reasonCounts = {};
+            filteredData.forEach(row => {
+                row.reasons.forEach(r => {
+                    reasonCounts[r] = (reasonCounts[r] || 0) + 1;
+                });
+            });
+
+            const sortedReasons = Object.entries(reasonCounts).sort((a, b) => b[1] - a[1]);
+            const labels = sortedReasons.map(r => r[0]);
+            const data = sortedReasons.map(r => r[1]);
+
+            if (charts.reasons) charts.reasons.destroy();
+
+            const ctx = document.getElementById('reasonsChart').getContext('2d');
+            charts.reasons = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Mentions',
+                        data: data,
+                        backgroundColor: liciousRed,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateRTEChart() {
+            const rteCounts = {};
+            filteredData.forEach(row => {
+                rteCounts[row.rte] = (rteCounts[row.rte] || 0) + 1;
+            });
+
+            const order = ['Very interested', 'Somewhat interested', 'Neutral', 'Not interested', 'Prefer to prepare from scratch'];
+            const labels = order.filter(o => rteCounts[o]);
+            const data = labels.map(l => rteCounts[l]);
+
+            const colors = labels.map(l => {
+                if (l === 'Very interested') return liciousRed;
+                if (l === 'Somewhat interested') return '#FF6B6B';
+                if (l === 'Neutral') return gray2;
+                return gray3;
+            });
+
+            if (charts.rte) charts.rte.destroy();
+
+            const ctx = document.getElementById('rteChart').getContext('2d');
+            charts.rte = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Respondents',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 5 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize filters
+        document.getElementById('ageFilter').addEventListener('change', filterData);
+        document.getElementById('genderFilter').addEventListener('change', filterData);
+        document.getElementById('goalFilter').addEventListener('change', filterData);
+        document.getElementById('locationFilter').addEventListener('change', filterData);
+
+        // Drill-down functions
+        function showDrillDown(location) {
+            // Filter data for this location
+            const locationData = filteredData.filter(row => {
+                if (location === 'Local Butcher') return row.location.includes('Local butcher');
+                if (location === 'Quick Commerce') return row.location.includes('Quick Commerce');
+                if (location === 'Supermarkets') return row.location.includes('Supermarket');
+                return row.location === location;
+            });
+
+            if (locationData.length === 0) return;
+
+            // Calculate stats
+            const total = locationData.length;
+            const avgAge = {};
+            const genderSplit = {};
+            const frequencyBreakdown = {};
+            const topReasons = {};
+            const rteInterest = {};
+
+            locationData.forEach(row => {
+                avgAge[row.age] = (avgAge[row.age] || 0) + 1;
+                genderSplit[row.gender] = (genderSplit[row.gender] || 0) + 1;
+                frequencyBreakdown[row.frequency] = (frequencyBreakdown[row.frequency] || 0) + 1;
+                row.reasons.forEach(r => {
+                    topReasons[r] = (topReasons[r] || 0) + 1;
+                });
+                rteInterest[row.rte] = (rteInterest[row.rte] || 0) + 1;
+            });
+
+            // Sort and get top items
+            const topReasonsList = Object.entries(topReasons)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(r => `${r[0]} (${r[1]})`);
+
+            const topAge = Object.entries(avgAge).sort((a, b) => b[1] - a[1])[0];
+            const topFrequency = Object.entries(frequencyBreakdown).sort((a, b) => b[1] - a[1])[0];
+            
+            const interestedInRTE = (rteInterest['Very interested'] || 0) + (rteInterest['Somewhat interested'] || 0);
+            const rtePercentage = ((interestedInRTE / total) * 100).toFixed(1);
+
+            // Build HTML
+            document.getElementById('drillDownTitle').textContent = `${location} Customers (${total} respondents)`;
+            
+            let statsHTML = `
+                <div class="drill-down-stat">
+                    <span class="drill-down-label">Most Common Age Group</span>
+                    <span class="drill-down-value">${topAge[0]} (${((topAge[1]/total)*100).toFixed(1)}%)</span>
+                </div>
+                <div class="drill-down-stat">
+                    <span class="drill-down-label">Male / Female Split</span>
+                    <span class="drill-down-value">${genderSplit['Male'] || 0} / ${genderSplit['Female'] || 0}</span>
+                </div>
+                <div class="drill-down-stat">
+                    <span class="drill-down-label">Most Common Purchase Frequency</span>
+                    <span class="drill-down-value">${topFrequency[0]}</span>
+                </div>
+                <div class="drill-down-stat">
+                    <span class="drill-down-label">Top Reasons for Choosing</span>
+                    <span class="drill-down-value">${topReasonsList.join(', ')}</span>
+                </div>
+                <div class="drill-down-stat">
+                    <span class="drill-down-label">Interested in Ready-to-Eat</span>
+                    <span class="drill-down-value">${rtePercentage}% (${interestedInRTE} people)</span>
+                </div>
+            `;
+
+            document.getElementById('drillDownStats').innerHTML = statsHTML;
+            document.getElementById('drillDownModal').classList.add('active');
+        }
+
+        function closeDrillDown() {
+            document.getElementById('drillDownModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.getElementById('drillDownModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDrillDown();
+            }
+        });
+
+        // Handle window resize for responsive chart
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                updateMarketShareChart();
+            }, 250);
+        });
+
+        // Initial render
+        updateAllCharts();
+    </script>
+</body>
+</html>
