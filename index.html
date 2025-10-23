@@ -665,9 +665,17 @@
                         const centerY = (chartArea.top + chartArea.bottom) / 2;
                         const isMobile = window.innerWidth < 768;
                         
-                        // CRITICAL: Save context and don't scale - Chart.js already handles DPI scaling
-                        // We just need to use appropriate font sizes
+                        // Get device pixel ratio for scaling
+                        const dpr = window.devicePixelRatio || 1;
+                        
+                        // CRITICAL: Save context state
                         ctx.save();
+                        
+                        // Set text rendering quality
+                        if (ctx.imageSmoothingEnabled !== undefined) {
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                        }
                         
                         chart.data.datasets.forEach((dataset, datasetIndex) => {
                             const meta = chart.getDatasetMeta(datasetIndex);
@@ -690,9 +698,13 @@
                                 const internalX = centerX + Math.cos(midAngle) * internalRadius;
                                 const internalY = centerY + Math.sin(midAngle) * internalRadius;
                                 
+                                // Scale font by device pixel ratio for crisp text
+                                const dpr = window.devicePixelRatio || 1;
+                                const baseFontSize = isMobile ? 12 : 14;
+                                
                                 // Use higher quality text rendering
                                 ctx.fillStyle = '#fff';
-                                ctx.font = isMobile ? 'bold 12px -apple-system, BlinkMacSystemFont, Arial' : 'bold 14px -apple-system, BlinkMacSystemFont, Arial';
+                                ctx.font = `bold ${baseFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'middle';
                                 ctx.fillText(`${percentage}%`, internalX, internalY);
@@ -722,8 +734,9 @@
                                 ctx.stroke();
                                 
                                 // Draw label name only (outside) with system font
+                                const labelFontSize = isMobile ? 10 : 12;
                                 ctx.fillStyle = '#333';
-                                ctx.font = isMobile ? '10px -apple-system, BlinkMacSystemFont, Arial' : '12px -apple-system, BlinkMacSystemFont, Arial';
+                                ctx.font = `${labelFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif`;
                                 ctx.textBaseline = 'middle';
                                 
                                 // Align text based on position
