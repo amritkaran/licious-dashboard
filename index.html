@@ -169,6 +169,14 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             image-rendering: -webkit-optimize-contrast;
+            text-rendering: optimizeLegibility;
+        }
+
+        /* Ensure crisp rendering */
+        .chart-container canvas {
+            image-rendering: auto;
+            image-rendering: crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
         }
 
         @media (max-width: 768px) {
@@ -593,6 +601,10 @@
 
             const ctx = document.getElementById('marketShareChart').getContext('2d');
             
+            // Enable high-quality text rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             // Responsive padding based on screen size
             const isMobile = window.innerWidth < 768;
             const paddingConfig = isMobile ? 
@@ -652,6 +664,10 @@
                         const centerY = (chartArea.top + chartArea.bottom) / 2;
                         const isMobile = window.innerWidth < 768;
                         
+                        // CRITICAL: Save context and don't scale - Chart.js already handles DPI scaling
+                        // We just need to use appropriate font sizes
+                        ctx.save();
+                        
                         chart.data.datasets.forEach((dataset, datasetIndex) => {
                             const meta = chart.getDatasetMeta(datasetIndex);
                             
@@ -673,8 +689,9 @@
                                 const internalX = centerX + Math.cos(midAngle) * internalRadius;
                                 const internalY = centerY + Math.sin(midAngle) * internalRadius;
                                 
+                                // Use higher quality text rendering
                                 ctx.fillStyle = '#fff';
-                                ctx.font = isMobile ? 'bold 12px Arial' : 'bold 14px Arial';
+                                ctx.font = isMobile ? 'bold 12px -apple-system, BlinkMacSystemFont, Arial' : 'bold 14px -apple-system, BlinkMacSystemFont, Arial';
                                 ctx.textAlign = 'center';
                                 ctx.textBaseline = 'middle';
                                 ctx.fillText(`${percentage}%`, internalX, internalY);
@@ -694,18 +711,18 @@
                                 const x3 = x2 + (x2 > centerX ? horizontalExtension : -horizontalExtension);
                                 const y3 = y2;
                                 
-                                // Draw connecting line
+                                // Draw connecting line with better quality
                                 ctx.beginPath();
                                 ctx.strokeStyle = '#999';
-                                ctx.lineWidth = 1;
+                                ctx.lineWidth = 1.5;
                                 ctx.moveTo(x1, y1);
                                 ctx.lineTo(x2, y2);
                                 ctx.lineTo(x3, y3);
                                 ctx.stroke();
                                 
-                                // Draw label name only (outside)
+                                // Draw label name only (outside) with system font
                                 ctx.fillStyle = '#333';
-                                ctx.font = isMobile ? '10px Arial' : '12px Arial';
+                                ctx.font = isMobile ? '10px -apple-system, BlinkMacSystemFont, Arial' : '12px -apple-system, BlinkMacSystemFont, Arial';
                                 ctx.textBaseline = 'middle';
                                 
                                 // Align text based on position
@@ -718,6 +735,8 @@
                                 }
                             });
                         });
+                        
+                        ctx.restore();
                     }
                 }]
             });
@@ -736,6 +755,11 @@
             if (charts.frequency) charts.frequency.destroy();
 
             const ctx = document.getElementById('frequencyChart').getContext('2d');
+            
+            // Enable high-quality text rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             charts.frequency = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -781,6 +805,11 @@
             if (charts.barriers) charts.barriers.destroy();
 
             const ctx = document.getElementById('barriersChart').getContext('2d');
+            
+            // Enable high-quality text rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             charts.barriers = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -824,6 +853,11 @@
             if (charts.reasons) charts.reasons.destroy();
 
             const ctx = document.getElementById('reasonsChart').getContext('2d');
+            
+            // Enable high-quality text rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             charts.reasons = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -872,6 +906,11 @@
             if (charts.rte) charts.rte.destroy();
 
             const ctx = document.getElementById('rteChart').getContext('2d');
+            
+            // Enable high-quality text rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
             charts.rte = new Chart(ctx, {
                 type: 'bar',
                 data: {
