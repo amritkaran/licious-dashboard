@@ -3,27 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutrition and Meat Purchase Behavior of Gym Goers in Bangalore</title>
-    
-    <!-- Open Graph Meta Tags for Better Preview Cards -->
-    <meta property="og:title" content="Nutrition and Meat Purchase Behavior of Gym Goers in Bangalore">
-    <meta property="og:description" content="Interactive dashboard analyzing 46 gym members in Bangalore. Discover why local butchers capture 34.8% market share vs Licious's 17.4%, and why 80.4% of buyers are not price-driven. Click to explore filters and detailed insights.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://amritkaran.github.io/licious-dashboard/index.html">
-    <meta property="og:image" content="https://amritkaran.github.io/licious-dashboard/preview.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Nutrition and Meat Purchase Behavior of Gym Goers in Bangalore">
-    <meta name="twitter:description" content="Interactive dashboard: Local butchers 34.8% vs Licious 17.4%. Only 19.6% cite price as barrier. 91.3% buy weekly. Explore the data.">
-    <meta name="twitter:image" content="https://amritkaran.github.io/licious-dashboard/preview.png">
-    
-    <!-- General Meta Tags -->
-    <meta name="description" content="Interactive survey dashboard analyzing meat purchase behavior of 46 gym members in Bangalore. Filter by demographics and explore market share, purchase frequency, and consumer insights.">
-    <meta name="author" content="Amrit Karan">
-    
+    <title>Licious Market Opportunity Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -182,6 +162,13 @@
 
         .chart-container.tall {
             height: 400px;
+        }
+
+        /* Fix for canvas pixelation on high-DPI displays */
+        canvas {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            image-rendering: -webkit-optimize-contrast;
         }
 
         @media (max-width: 768px) {
@@ -530,6 +517,9 @@
 
         Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif';
         Chart.defaults.color = gray1;
+        
+        // Fix pixelation on high-DPI displays (Retina, 4K monitors)
+        Chart.defaults.devicePixelRatio = window.devicePixelRatio || 2;
 
         let charts = {};
 
@@ -623,6 +613,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 2,
                     onClick: (event, elements) => {
                         if (elements.length > 0) {
                             const index = elements[0].index;
@@ -759,6 +750,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 2,
                     plugins: {
                         legend: { display: false }
                     },
@@ -804,6 +796,7 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 2,
                     plugins: {
                         legend: { display: false }
                     },
@@ -846,6 +839,7 @@
                     indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 2,
                     plugins: {
                         legend: { display: false }
                     },
@@ -892,6 +886,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    devicePixelRatio: window.devicePixelRatio || 2,
                     plugins: {
                         legend: { display: false }
                     },
